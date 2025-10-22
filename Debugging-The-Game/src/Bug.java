@@ -1,12 +1,13 @@
 public class Bug {
+    private String type;
     private int severity;
-    private boolean hidden;
 
-    public Bug(int severity, boolean hidden) {
+    public Bug(String type, int severity) {
+        this.type = type;
         this.severity = severity;
-        this.hidden = hidden;
     }
 
+    public String getType() { return type; }
     public int getSeverity() { return severity; }
-    public boolean isHidden() { return hidden; }
+    public void increaseSeverity(int n) { severity += n; }
 }

@@ -1,7 +1,13 @@
 public class Gear {
-    private int bonus = 1;
-    private boolean refactorActive = false;
+    private String name;
+    private int bonus; // reduces chance of bug multiplication
 
-    public int getBonus() { return bonus + (refactorActive ? 2 : 0); }
-    public void addRefactorBonus() { refactorActive = true; }
+    public Gear(String name, int bonus) {
+        this.name = name;
+        this.bonus = bonus;
+    }
+
+    public String getName() { return name; }
+    public int getBonus() { return bonus; }
 }
+

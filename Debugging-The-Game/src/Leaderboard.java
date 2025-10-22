@@ -1,19 +1,20 @@
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.*;
 
 public class Leaderboard {
-    private ArrayList<String> names = new ArrayList<>();
-    private ArrayList<Integer> scores = new ArrayList<>();
+    private List<Integer> scores = new ArrayList<>();
 
-    public void addScore(Player player, int timeRemaining) {
-        names.add("Player");
-        scores.add(timeRemaining);
+    public void update(int remainingBugs, int timeLeft) {
+        int score = Math.max(0, 1000 - remainingBugs*10 + timeLeft*5);
+        scores.add(score);
+        Collections.sort(scores, Collections.reverseOrder());
+        display();
     }
 
-    public void displayTopScores() {
+    public void display() {
         System.out.println("\n=== LEADERBOARD ===");
-        for (int i = 0; i < scores.size(); i++) {
-            System.out.println((i+1) + ". " + names.get(i) + " - Time Left: " + scores.get(i) + "s");
+        for (int i = 0; i < Math.min(5, scores.size()); i++) {
+            System.out.println((i+1) + ". " + scores.get(i));
         }
+        System.out.println("==================\n");
     }
 }

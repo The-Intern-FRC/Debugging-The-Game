@@ -4,68 +4,81 @@ public class GameEngine {
     private Player player;
     private Leaderboard leaderboard;
     private Scanner scanner = new Scanner(System.in);
-    private int totalTime = 180; // total game time in seconds
+    private int totalTime = 180;
 
     public GameEngine() {
-        this.player = new Player();
-        this.leaderboard = new Leaderboard();
+        player = new Player();
+        leaderboard = new Leaderboard();
     }
 
     public void startGame() {
         npcIntro();
         codeScreenIntro();
-        player.addBugs(5); // start with some initial bugs
 
-        while (totalTime > 0 && player.getBugs() > 0) {
+        while (totalTime > 0 && player.totalBugs() > 0) {
             Utils.clearScreen();
+            player.processFutureBugs();
             displayCodeScreen();
             displayActions();
             int choice = Utils.getChoice(scanner, 1, 6);
             confirmAndExecute(choice);
 
             totalTime -= player.getLastActionTime();
+            player.bugsMultiply();
 
-            if (Utils.randomChance(5)) handleCompilerError();
-            player.bugsMultiply(); // animated in Player logs
+            // Passive energy drain
+            player.reduceEnergy(2);
+            if (player.getEnergy() <= 0) {
+                int penalty = Utils.randomInt(2, 5);
+                player.addLog("Exhaustion! " + penalty + " bugs appear while you collapse.");
+                for (int i = 0; i < penalty; i++) {
+                    String type = Utils.randomBugType();
+                    player.addLog("A " + type + " bug spawned from fatigue.");
+                }
+            }
+
+            // Midgame Copilot magical save
+            if (!player.isCopilotActive() && player.getEnergy() < 30 && player.totalBugs() > 10) {
+                player.addLog("GitHub Copilot magically intervenes to prevent disaster!");
+                player.askCopilot();
+            }
+
+            if (Utils.randomChance(10)) handleCompilerError();
         }
 
         endGame();
     }
 
-    // --- NPC Intro ---
     private void npcIntro() {
         Utils.clearScreen();
-        System.out.println("Project Manager: Welcome to programming! Let's start you off easy...");
-        Utils.animateTyping("Project Manager: Your first project is pretty simple: debug the Orientation Game.", 40);
-        Utils.animateTyping("Project Manager: Yes… the game you are about to play. It's self-aware, like this.", 40);
-        Utils.animateTyping("Project Manager: Just dip your toes in, don’t worry, what could possibly go wrong?", 40);
-        System.out.println("\nPress Enter to dive into the code…");
+        System.out.println("Project Manager: Welcome to programming! Here's your first project...");
+        Utils.animateTyping("Project Manager: It's a simple start: debug the Orientation Game.", 40);
+        Utils.animateTyping("Project Manager: (Yes, that means this game itself.)", 40);
+        System.out.println("\nPress Enter to dive into the terminal…");
         scanner.nextLine();
     }
 
-    // --- Code Screen Intro ---
     private void codeScreenIntro() {
         Utils.clearScreen();
         Utils.animateTyping("Loading Debugging Terminal...", 50);
         Utils.flashMessage(
-            "┌────────────────────────────────────────┐\n" +
-            "│           DEBUGGING TERMINAL           │\n" +
-            "└────────────────────────────────────────┘", 2
+            "┌──────────────────────────────┐\n" +
+            "│     DEBUGGING TERMINAL       │\n" +
+            "└──────────────────────────────┘", 2
         );
     }
 
-    // --- Display ---
     private void displayCodeScreen() {
-        System.out.println("\n╔════════════════════════════════════════╗");
-        System.out.println("║ TIME: " + totalTime + "s" + "   BUGS: " + player.getBugs());
+        System.out.println("\n╔════════════════════════════════╗");
+        System.out.println("║ TIME: " + totalTime + "s  BUGS: " + player.totalBugs());
         System.out.println("║ ENERGY: [" + Utils.dynamicBar(player.getEnergy(), 100, 20) + "] " + player.getEnergy() + "/100");
-        System.out.println("║ CAFFEINE: " + player.getCaffeine() + "   GEAR: +" + player.getGearBonus());
+        System.out.println("║ CAFFEINE: " + player.getCaffeine() + "  GEAR: +" + player.getGearBonus());
         System.out.println("║ COPILOT USES: " + player.getCopilotUsed() + "/5");
-        System.out.println("╚════════════════════════════════════════╝\n");
+        System.out.println("╚════════════════════════════════╝\n");
 
         System.out.println("Recent Logs:");
         player.displayLogs();
-        System.out.println("----------------------------------------");
+        System.out.println("--------------------------------");
     }
 
     private void displayActions() {
@@ -83,10 +96,10 @@ public class GameEngine {
         int actionTime = 0;
         switch (choice) {
             case 1: desc = "Attempt to remove bugs. Some may spawn back."; actionTime = 10; break;
-            case 2: desc = "Run checks to find hidden bugs. Costs energy."; actionTime = 15; break;
-            case 3: desc = "Refactor code to reduce future bug growth. Costs energy."; actionTime = 20; break;
-            case 4: desc = "Scan code to predict bug growth. Costs little energy."; actionTime = 5; break;
-            case 5: desc = "Drink coffee to restore energy. May increase next bug growth."; actionTime = 5; break;
+            case 2: desc = "Run checks to find hidden bugs."; actionTime = 15; break;
+            case 3: desc = "Refactor code to reduce future bug growth."; actionTime = 20; break;
+            case 4: desc = "Scan code to predict bug growth."; actionTime = 5; break;
+            case 5: desc = "Drink coffee to restore energy."; actionTime = 5; break;
             case 6: desc = "Ask GitHub Copilot for advice. Limited to 5 uses."; actionTime = 5; break;
         }
 
@@ -111,30 +124,16 @@ public class GameEngine {
     }
 
     private void handleCompilerError() {
-        Utils.animateTyping("\n[Compiler] ERROR: mysterious failure!", 50);
-        System.out.print("Retry (Y/N)? ");
-        String retry = scanner.nextLine().trim().toUpperCase();
-        if (retry.equals("Y")) {
-            totalTime -= 10;
-            player.reduceEnergy(10);
-            player.addLog("[Compiler] Retry executed. Time and energy spent.");
-        } else {
-            totalTime -= 5;
-            player.addLog("[Compiler] Ignored. Hidden bugs may remain.");
-        }
+        player.addLog("Compiler Error! Code won't run. Costs energy/time to retry.");
+        player.reduceEnergy(5);
     }
 
     private void endGame() {
-        System.out.println("\n=== DEBUGGING SESSION END ===");
-        if (player.getBugs() <= 0) Utils.flashMessage("All bugs removed! You survived debugging.", 2);
-        else Utils.flashMessage("Time's up! Bugs remain. Debugging failed.", 2);
-
-        System.out.println("Bugs remaining: " + player.getBugs());
-        System.out.println("Time left: " + totalTime + "s");
-        System.out.println("Energy remaining: " + player.getEnergy());
-        System.out.println("Copilot used: " + player.getCopilotUsed() + "/5");
-
-        leaderboard.addScore(player, totalTime);
-        leaderboard.displayTopScores();
+        Utils.clearScreen();
+        if (player.totalBugs() <= 0) System.out.println("Victory! But debugging never ends.");
+        else if (totalTime <= 0) System.out.println("Time's up! Code still broken.");
+        System.out.println("\nFinal Stats:");
+        displayCodeScreen();
+        leaderboard.update(player.totalBugs(), totalTime);
     }
 }

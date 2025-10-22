@@ -1,13 +1,12 @@
 public class Upgrade {
     private String name;
-    private String description;
-    private int bonus;
+    private String effect;
 
-    public Upgrade(String n, String d, int b) {
-        name = n; description = d; bonus = b;
+    public Upgrade(String name, String effect) {
+        this.name = name;
+        this.effect = effect;
     }
 
-    public int getBonus() { return bonus; }
     public String getName() { return name; }
-    public String getDescription() { return description; }
+    public String getEffect() { return effect; }
 }
