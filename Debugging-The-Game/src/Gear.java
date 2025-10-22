@@ -1,14 +1,7 @@
 public class Gear {
-    private String name;
-    private double squashBonus, refactorBonus, checkEfficiency, bugReduction;
+    private int bonus = 1;
+    private boolean refactorActive = false;
 
-    public Gear(String name,double squash,double refactor,double check,double reduce){
-        this.name=name; squashBonus=squash; refactorBonus=refactor; checkEfficiency=check; bugReduction=reduce;
-    }
-
-    public String getName(){return name;}
-    public double getSquashBonus(){return squashBonus;}
-    public double getRefactorBonus(){return refactorBonus;}
-    public double getCheckEfficiency(){return checkEfficiency;}
-    public double getBugReduction(){return bugReduction;}
+    public int getBonus() { return bonus + (refactorActive ? 2 : 0); }
+    public void addRefactorBonus() { refactorActive = true; }
 }

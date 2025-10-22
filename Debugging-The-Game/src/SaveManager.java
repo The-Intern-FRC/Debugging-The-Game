@@ -1,27 +1,16 @@
 import java.io.*;
-import java.util.*;
 
 public class SaveManager {
-    private String folder;
-
-    public SaveManager(String folder){this.folder=folder;}
-
-    public Player loadOrCreatePlayer(String name){
-        File f = new File(folder+name+".sav");
-        if(f.exists()){
-            try(ObjectInputStream ois=new ObjectInputStream(new FileInputStream(f))){
-                return (Player) ois.readObject();
-            } catch(Exception e){System.out.println("Load failed, creating new player.");}
-        }
-        return new Player(name);
+    public static void savePlayer(Player p, String filename) {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("saves/" + filename))) {
+            out.writeObject(p);
+            System.out.println("Game saved.");
+        } catch (IOException e) { System.out.println("Failed to save."); }
     }
 
-    public void savePlayer(Player p){
-        try{
-            new File(folder).mkdirs();
-            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(folder+p.getName()+".sav"));
-            oos.writeObject(p);
-            oos.close();
-        } catch(Exception e){System.out.println("Save failed.");}
+    public static Player loadPlayer(String filename) {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("saves/" + filename))) {
+            return (Player) in.readObject();
+        } catch (Exception e) { System.out.println("Failed to load."); return null; }
     }
 }

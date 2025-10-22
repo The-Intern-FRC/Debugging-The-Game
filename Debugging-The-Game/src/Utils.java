@@ -1,38 +1,54 @@
-import java.util.*;
+import java.util.Random;
 
 public class Utils {
-    public static void clearScreen(){System.out.print("\033[H\033[2J"); System.out.flush();}
-    public static void sleep(int ms){try{Thread.sleep(ms);}catch(Exception e){}}
-    public static void waitForEnter(Scanner sc){System.out.println("Press Enter..."); sc.nextLine();}
-    public static String colorYellow(String s){return "\033[33m"+s+"\033[0m";}
-    public static String colorCyan(String s){return "\033[36m"+s+"\033[0m";}
+    private static Random random = new Random();
 
-    public static String energyBar(int current,int max){
-        int total=20; int filled=(int)((current/(double)max)*total);
-        StringBuilder sb=new StringBuilder("[");
-        for(int i=0;i<filled;i++) sb.append("#");
-        for(int i=filled;i<total;i++) sb.append("-");
-        sb.append("]");
-        return sb.toString();
+    public static void clearScreen() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
     }
 
-    public static void progressBar(int seconds){
-        for(int i=0;i<=20;i++){
-            System.out.print("\r[");
-            for(int j=0;j<i;j++) System.out.print("#");
-            for(int j=i;j<20;j++) System.out.print("-");
-            System.out.print("]");
-            sleep(seconds*50);
+    public static boolean randomChance(int percent) {
+        return random.nextInt(100) < percent;
+    }
+
+    public static int randomInt(int min, int max) {
+        return random.nextInt(max - min + 1) + min;
+    }
+
+    public static int getChoice(java.util.Scanner scanner, int min, int max) {
+        int choice = 0;
+        while (choice < min || choice > max) {
+            System.out.print("Enter choice (" + min + "-" + max + "): ");
+            try { choice = Integer.parseInt(scanner.nextLine()); }
+            catch (Exception e) { choice = 0; }
+        }
+        return choice;
+    }
+
+    public static void flashMessage(String msg, int times) {
+        for (int i = 0; i < times; i++) {
+            clearScreen();
+            System.out.println(msg);
+            try { Thread.sleep(500); } catch (InterruptedException e) {}
+            clearScreen();
+            try { Thread.sleep(200); } catch (InterruptedException e) {}
+        }
+        System.out.println(msg);
+    }
+
+    public static void animateTyping(String msg, int delayMs) {
+        for (char c : msg.toCharArray()) {
+            System.out.print(c);
+            try { Thread.sleep(delayMs); } catch (InterruptedException e) {}
         }
         System.out.println();
     }
 
-    public static String bugHydraVisual(int count){
-        int heads=Math.min(count,10);
-        StringBuilder sb=new StringBuilder();
-        sb.append("Bug Hydra: ");
-        for(int i=0;i<heads;i++) sb.append("🐛");
-        if(count>10) sb.append("+").append(count-10);
-        return sb.toString();
+    public static String dynamicBar(int value, int max, int width) {
+        int filled = (int)((double)value / max * width);
+        StringBuilder bar = new StringBuilder();
+        for (int i = 0; i < width; i++) bar.append(i < filled ? "#" : " ");
+        return bar.toString();
     }
 }

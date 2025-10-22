@@ -1,62 +1,115 @@
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class Player {
-    private String name;
-    private int level=1;
-    private int xp=0;
-    private int credits=50;
-    private int energy=100;
-    private int maxEnergy=100;
-    private List<Gear> gearList = new ArrayList<>();
-    private List<String> badges = new ArrayList<>();
+    private int bugs = 0;
+    private int energy = 100;
+    private int caffeine = 0;
+    private int gearBonus = 0;
+    private int copilotUsed = 0;
+    private int lastActionTime = 0;
 
-    public Player(String name){this.name=name;}
+    private Queue<String> logs = new LinkedList<>();
 
-    public String getName(){return name;}
-    public int getLevel(){return level;}
-    public int getXp(){return xp;}
-    public int getCredits(){return credits;}
-    public int getEnergy(){return energy;}
-    public int getMaxEnergy(){return maxEnergy;}
+    // --- Logs Management ---
+    public void addLog(String log) {
+        if (logs.size() >= 5) logs.poll(); // keep last 5 logs
+        logs.offer(log);
+    }
 
-    public void gainXp(int amount){xp+=amount; tryLevelUp();}
-    public void addCredits(int c){credits+=c;}
-    public void addEnergy(int e){energy=Math.min(maxEnergy,energy+e);}
-    public boolean consumeEnergy(int e){if(energy>=e){energy-=e; return true;} return false;}
-
-    public void tryLevelUp(){
-        int threshold = level*50;
-        if(xp>=threshold){
-            xp-=threshold; level++; maxEnergy+=10; energy=maxEnergy;
-            badges.add("Level "+level+" Badge");
-            System.out.println("🎉 Level Up! You are now level "+level);
+    public void displayLogs() {
+        if (logs.isEmpty()) System.out.println(" - No recent activity.");
+        else {
+            for (String log : logs) System.out.println(" - " + log);
         }
     }
 
-    public double getSquashBonus(){return gearList.stream().mapToDouble(Gear::getSquashBonus).sum();}
-    public double getRefactorBonus(){return gearList.stream().mapToDouble(Gear::getRefactorBonus).sum();}
-    public double getCheckEfficiency(){return gearList.stream().mapToDouble(Gear::getCheckEfficiency).sum();}
-    public double getMultiplicativeReduction(){return gearList.stream().mapToDouble(Gear::getBugReduction).sum();}
-
-    public void recoverEnergyOnTick(){addEnergy(2);}
-
-    public String listGearNames(){
-        if(gearList.isEmpty()) return "None";
-        StringBuilder sb = new StringBuilder();
-        for(Gear g:gearList) sb.append(g.getName()).append(" ");
-        return sb.toString().trim();
+    // --- Actions ---
+    public void squashBug() {
+        if (bugs > 0) {
+            bugs--;
+            addLog("Squashed a bug! Bugs left: " + bugs);
+        } else {
+            addLog("No bugs to squash.");
+        }
+        energy -= 5;
     }
 
-    public String listBadges(){
-        if(badges.isEmpty()) return "None";
-        return String.join(", ", badges);
+    public void runCheck() {
+        addLog("Running checks... uncovering hidden issues.");
+        if (Utils.randomChance(30)) {
+            int found = Utils.randomInt(1, 3);
+            bugs += found;
+            addLog(found + " new bug(s) revealed!");
+        } else {
+            addLog("No hidden bugs found.");
+        }
+        energy -= 10;
     }
 
-    public String getTitle(){
-        if(level>=10) return "Code Overlord";
-        if(level>=5) return "Debugging Guru";
-        return "Junior Coder";
+    public void refactor() {
+        addLog("Refactoring code... may reduce future bug growth.");
+        energy -= 15;
+        gearBonus += 1;
+        addLog("Gear improved! Bonus now: +" + gearBonus);
     }
 
-    public void addGear(Gear g){gearList.add(g);}
+    public void scan() {
+        addLog("Scanning code for potential issues...");
+        if (Utils.randomChance(50)) {
+            addLog("Prediction: bug growth may slow next turn.");
+        } else {
+            addLog("Prediction: code still messy, no change.");
+        }
+        energy -= 5;
+    }
+
+    public void drinkCoffee() {
+        caffeine += 1;
+        energy += 20;
+        if (energy > 100) energy = 100;
+        addLog("Coffee consumed. Energy: " + energy + "/100");
+        // caffeine may increase next bug growth slightly
+        if (Utils.randomChance(25)) {
+            bugs += 1;
+            addLog("Uh oh… caffeine-induced bug appeared!");
+        }
+    }
+
+    public void askCopilot() {
+        if (copilotUsed >= 5) {
+            addLog("Copilot limit reached! Can't ask for more help.");
+            return;
+        }
+        copilotUsed++;
+        addLog("GitHub Copilot advice received. Useful? Probably slightly.");
+        // minor effect: small energy recovery
+        energy += 5;
+        if (energy > 100) energy = 100;
+    }
+
+    // --- Bug Multiplication ---
+    public void bugsMultiply() {
+        int newBugs = 0;
+        if (Utils.randomChance(40)) {
+            newBugs = Utils.randomInt(1, 3);
+            bugs += newBugs;
+            addLog(newBugs + " bug(s) multiplied unexpectedly!");
+        }
+    }
+
+    // --- Getters / Setters ---
+    public int getBugs() { return bugs; }
+    public int getEnergy() { return energy; }
+    public void reduceEnergy(int n) { energy -= n; }
+    public int getCaffeine() { return caffeine; }
+    public int getGearBonus() { return gearBonus; }
+    public int getCopilotUsed() { return copilotUsed; }
+    public void setLastActionTime(int t) { lastActionTime = t; }
+    public int getLastActionTime() { return lastActionTime; }
+
+    public void addBugs(int n) {
+        bugs += n;
+        addLog(n + " bug(s) appeared! Total bugs: " + bugs);
+    }
 }
