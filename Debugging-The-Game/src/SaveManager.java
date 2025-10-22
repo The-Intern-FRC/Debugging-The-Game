@@ -1,26 +1,28 @@
 import java.io.*;
 
 public class SaveManager {
-    private static final String SAVE_PATH = "saves/save.dat";
+    private static final String PATH = "saves/player.sav";
 
-    public static void save(Player player) {
+    public static void save(Player p) {
         try {
-            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(SAVE_PATH));
-            out.writeObject(player);
-            out.close();
-        } catch(Exception e) {
-            System.out.println("Failed to save game: " + e.getMessage());
+            new File("saves").mkdirs();
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(PATH));
+            oos.writeObject(p);
+            oos.close();
+            System.out.println("Saved.");
+        } catch (Exception e) {
+            System.out.println("Save failed: " + e.getMessage());
         }
     }
 
     public static Player load() {
         try {
-            ObjectInputStream in = new ObjectInputStream(new FileInputStream(SAVE_PATH));
-            Player player = (Player) in.readObject();
-            in.close();
-            return player;
-        } catch(Exception e) {
-            System.out.println("No save found. Starting new game.");
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(PATH));
+            Player p = (Player) ois.readObject();
+            ois.close();
+            return p;
+        } catch (Exception e) {
+            System.out.println("No save found; starting new.");
             return new Player();
         }
     }

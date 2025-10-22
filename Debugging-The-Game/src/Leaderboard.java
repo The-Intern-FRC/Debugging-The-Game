@@ -4,17 +4,16 @@ public class Leaderboard {
     private List<Integer> scores = new ArrayList<>();
 
     public void update(int remainingBugs, int timeLeft) {
-        int score = Math.max(0, 1000 - remainingBugs*10 + timeLeft*5);
+        int score = Math.max(0, 2000 - remainingBugs*15 + timeLeft*6);
         scores.add(score);
         Collections.sort(scores, Collections.reverseOrder());
-        display();
     }
 
     public void display() {
-        System.out.println("\n=== LEADERBOARD ===");
+        System.out.println("\n=== LEADERBOARD (top 5) ===");
         for (int i = 0; i < Math.min(5, scores.size()); i++) {
             System.out.println((i+1) + ". " + scores.get(i));
         }
-        System.out.println("==================\n");
+        System.out.println("============================\n");
     }
 }

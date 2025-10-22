@@ -1,6 +1,6 @@
 public class Gear {
     private String name;
-    private int bonus; // reduces chance of bug multiplication
+    private int bonus; // small static benefits
 
     public Gear(String name, int bonus) {
         this.name = name;
@@ -10,4 +10,3 @@ public class Gear {
     public String getName() { return name; }
     public int getBonus() { return bonus; }
 }
-
