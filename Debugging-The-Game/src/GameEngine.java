@@ -16,14 +16,12 @@ public class GameEngine {
         projectManagerIntro();
         codeScreenIntro();
 
-        // initial warmup: player starts with some bugs (player constructor does)
-        player.addLog("Project loaded: Orientation Game (self-debugging).");
+        player.addLog("Project loaded: Orientation Game (self-debugging exercise).");
 
-        // Main loop
         while (totalTime > 0 && player.totalBugs() > 0) {
             turn++;
             Utils.clearScreen();
-            player.processFutureBugs(turn);          // process delayed events tied to turn number
+            player.processFutureBugs(turn);
             displayCodeScreen();
             displayActionsAndCosts();
             int choice = Utils.getChoice(scanner, 1, 6);
@@ -31,17 +29,20 @@ public class GameEngine {
 
             // apply time and passive effects
             totalTime -= player.getLastActionTime();
-            player.applyPassiveTurnEffect();         // passive drain, handle exhaustion
-            player.bugsMultiply();                   // exponential-ish growth depending on state
+            player.applyPassiveTurnEffect();
+            player.bugsMultiply();
 
-            // midgame Copilot auto-intervene if dire (only if not overused)
-            if (!player.isCopilotActive() && player.getEnergy() < 30 && player.totalBugs() >= 12 && player.getCopilotUsed() < Player.COPILOT_MAX) {
-                player.addLog("Auto-Copilot: System detected critical failure; Copilot intervenes!");
-                player.askCopilot(); // help the player automatically once as a safety net
+            // Midgame: automatic Copilot intervention once as safety net if dire
+            if (!player.isCopilotActive()
+                    && player.getEnergy() < 30
+                    && player.totalBugs() >= 12
+                    && player.getCopilotUsed() < Player.COPILOT_MAX) {
+                player.addLog("Auto-Copilot: Critical state detected — Copilot auto-intervening.");
+                player.askCopilot();
             }
 
             // occasional compiler error
-            if (Utils.randomChance(10)) {
+            if (Utils.randomChance(8)) {
                 handleCompilerError();
             }
         }
@@ -51,24 +52,22 @@ public class GameEngine {
 
     private void projectManagerIntro() {
         Utils.clearScreen();
-        Utils.animateTyping("Project Manager: Welcome. Your first project is simple: debug the Orientation Game — yes, this game.", 30);
-        Utils.animateTyping("Project Manager: I'm going to walk you through the actions. Learn them. Live by them.", 30);
+        Utils.animateTyping("Project Manager: Welcome. Your first project is simple: debug the Orientation Game — yes, this game.", 28);
+        Utils.animateTyping("Project Manager: I'm going to walk you through your options. Learn them. Use them wisely.", 28);
         Utils.animateTyping("", 10);
 
-        // Walkthrough - concise, clear, and with cost/risk labels
-        Utils.animateTyping("Walkthrough (Action : effect — time | energy) [Risk -> Reward]:", 25);
-        Utils.animateTyping("1) Squash Bug : Immediately remove 1-3 bugs (depends on type & gear) — 12s | 12 energy [HIGH RISK -> HIGH REWARD]", 8);
-        Utils.animateTyping("    Risk: 40% chance a delayed, larger return (2-5) of that or other types. Use sparingly.", 8);
-        Utils.animateTyping("2) Run Check : Reveal hidden problems; may reveal 0-3 bugs — 18s | 18 energy [MED RISK -> INFO]", 8);
-        Utils.animateTyping("    Benefit: helps you plan; may expose hidden bugs (so it can look worse but helps long term).", 8);
-        Utils.animateTyping("3) Refactor : Reduce bug growth for next 3 turns significantly — 24s | 22 energy [LOW RISK -> LONG-TERM REWARD]", 8);
-        Utils.animateTyping("    Use early or when growth spikes. Makes future multipliers smaller.", 8);
-        Utils.animateTyping("4) Scan : Predict next-turn growth (estimate shown) — 6s | 6 energy [LOW RISK -> PLANNING]", 8);
-        Utils.animateTyping("5) Drink Coffee : +25 energy instantly, but increases next-turn growth chance — 6s | 0 energy [SHORT-TERM FIX -> RISK]", 8);
-        Utils.animateTyping("6) Ask GitHub Copilot : Get a strong hint or small auto-fix (max 5 times total). — 6s | 0 energy [LIMITED LIFELINE]", 8);
-        Utils.animateTyping("", 25);
+        Utils.animateTyping("Walkthrough (Action : effect — time | energy) [Risk -> Reward]:", 20);
+        Utils.animateTyping("1) Squash Bug : Remove 1-3 bugs (depends on type & gear) — 12s | 12 energy [HIGH RISK -> HIGH REWARD]", 6);
+        Utils.animateTyping("    Risk: chance of backfire and delayed returns. Use when you can afford the blowback.", 6);
+        Utils.animateTyping("2) Run Check : Reveal hidden bugs (0-3) — 18s | 18 energy [INFO -> PLANNING]", 6);
+        Utils.animateTyping("    Benefit: exposes hidden issues so you can plan; may increase visible bug count temporarily.", 6);
+        Utils.animateTyping("3) Refactor : Reduce bug growth significantly for next 3 turns — 24s | 22 energy [DEFENSIVE -> LONG-TERM]", 6);
+        Utils.animateTyping("4) Scan : Estimate next-turn growth (LOW/MED/HIGH) — 6s | 6 energy [LOW RISK -> PLANNING]", 6);
+        Utils.animateTyping("5) Drink Coffee : +25 energy instantly, but increases growth chance next turn — 6s | 0 energy [SHORT TERM FIX -> RISK]", 6);
+        Utils.animateTyping("6) Ask GitHub Copilot : Hint or auto-fix. Limited lifeline (6 uses). — 6s | 0 energy [LIFELINE]", 6);
+        Utils.animateTyping("", 20);
 
-        Utils.animateTyping("Press Enter to dive into the terminal. Remember: early wins can cause worse late-game consequences.", 25);
+        Utils.animateTyping("Press Enter to dive into the terminal. Early wins can cause late pain. Play smart.", 22);
         scanner.nextLine();
     }
 
@@ -105,7 +104,7 @@ public class GameEngine {
         System.out.println("3) Refactor           — 24s | 22 energy    [DEFENSIVE / LONG-TERM]");
         System.out.println("4) Scan               —  6s | 6 energy     [LOW RISK / INFO]");
         System.out.println("5) Drink Coffee       —  6s | 0 energy     [ENERGY BOOST / INCREASE GROWTH]");
-        System.out.println("6) Ask GitHub Copilot —  6s | 0 energy     [CRITICAL HELP, 5 USES]");
+        System.out.println("6) Ask GitHub Copilot —  6s | 0 energy     [CRITICAL HELP, " + Player.COPILOT_MAX + " USES]");
     }
 
     private void confirmAndExecute(int choice) {
@@ -121,7 +120,7 @@ public class GameEngine {
             default: desc = ""; actionTime = 0;
         }
 
-        Utils.animateTyping("[Action Preview] " + desc, 30);
+        Utils.animateTyping("[Action Preview] " + desc, 28);
         System.out.print("Confirm action? (Y/N): ");
         String c = scanner.nextLine().trim().toUpperCase();
         if (!"Y".equals(c)) {
@@ -149,7 +148,7 @@ public class GameEngine {
             player.addLog("[Compiler] Retry executed. Time and energy spent.");
             player.setLastActionTime(player.getLastActionTime() + 10);
             player.reduceEnergy(10);
-            totalTime -= 10; // extra time
+            totalTime -= 10;
         } else {
             player.addLog("[Compiler] Ignored. Hidden issues may remain.");
             totalTime -= 5;
@@ -160,8 +159,22 @@ public class GameEngine {
         Utils.clearScreen();
         if (player.totalBugs() <= 0) {
             Utils.flashMessage("=== VICTORY: All bugs eliminated. You won. ===", 2);
+            Utils.animateTyping("Project Manager: Wait... you actually did it. I... cannot compute.", 28);
+            Utils.animateTyping("Project Manager: This was supposed to be an orientation exercise. That was not part of the plan.", 28);
+            Utils.animateTyping("\nSYSTEM: Launching secondary terminal... (press Enter)", 28);
+            scanner.nextLine();
+            Utils.clearScreen();
+            // Secondary ominous terminal
+            Utils.flashMessage(
+                "████████████████████████████████████████████████████████\n" +
+                "██  SECONDARY DEBUG ENVIRONMENT INITIALIZED           ██\n" +
+                "██  WARNING: Unknown dependencies detected             ██\n" +
+                "██  SUGGESTION: Proceed with caution.                 ██\n" +
+                "████████████████████████████████████████████████████████", 2);
+            Utils.animateTyping("TO BE CONTINUED...", 120);
         } else if (totalTime <= 0) {
             Utils.flashMessage("=== TIME UP: Project shipped buggy. ===", 2);
+            Utils.animateTyping("Project Manager: We shipped. It compiles. People will complain. It's fine.", 30);
         } else {
             Utils.flashMessage("=== SESSION ENDED ===", 1);
         }
@@ -170,9 +183,5 @@ public class GameEngine {
         displayCodeScreen();
         leaderboard.update(player.totalBugs(), totalTime);
         leaderboard.display();
-        System.out.println("\nMeta strategy tips:");
-        System.out.println(" - Early refactor + conservative squashes + save Copilot for crisis gives best chance.");
-        System.out.println(" - Use Scan/Run Check to plan; do not spam Squash early.");
-        System.out.println(" - Coffee is a last-resort burst, not a crutch.");
     }
 }

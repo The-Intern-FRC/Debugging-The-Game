@@ -1,6 +1,6 @@
 public class Gear {
     private String name;
-    private int bonus; // small static benefits
+    private int bonus;
 
     public Gear(String name, int bonus) {
         this.name = name;

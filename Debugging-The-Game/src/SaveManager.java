@@ -5,7 +5,7 @@ public class SaveManager {
 
     public static void save(Player p) {
         try {
-            new File("saves").mkdirs();
+            new java.io.File("saves").mkdirs();
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(PATH));
             oos.writeObject(p);
             oos.close();

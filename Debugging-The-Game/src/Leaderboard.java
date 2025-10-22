@@ -4,7 +4,7 @@ public class Leaderboard {
     private List<Integer> scores = new ArrayList<>();
 
     public void update(int remainingBugs, int timeLeft) {
-        int score = Math.max(0, 2000 - remainingBugs*15 + timeLeft*6);
+        int score = Math.max(0, 2000 - remainingBugs * 15 + Math.max(0, timeLeft) * 6);
         scores.add(score);
         Collections.sort(scores, Collections.reverseOrder());
     }
